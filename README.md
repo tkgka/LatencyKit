@@ -91,3 +91,7 @@ final class Model: ObservableObject {
     }
 }
 ```
+
+---
+
+this repo inspired by [this article](https://juejin.cn/post/7395080141129842697)

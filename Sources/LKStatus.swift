@@ -9,7 +9,7 @@ import Foundation
 
 public enum LKStatus {
     
-    case slow
-    case medium
-    case fast
+    case slow(rtt: Double, throughputByte: Double)
+    case medium(rtt: Double, throughputByte: Double)
+    case fast(rtt: Double, throughputByte: Double)
 }

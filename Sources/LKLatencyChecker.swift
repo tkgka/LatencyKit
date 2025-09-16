@@ -15,9 +15,10 @@ final actor LKLatencyActor {
     func calculateStatus() -> LKStatus {
         let currentTime = Date()
         let elapsedSeconds = currentTime.timeIntervalSince(throughputCheckTime ?? currentTime)
-        
-        let rttScore = 1 - min((rtt ?? rttReferenceMillisecond * 2) / rttReferenceMillisecond, 1)
-        let throughputScore = 1 - min((throughput ?? throughputReferenceByte / 5) / throughputReferenceByte, 1)
+        let rtt = rtt ?? rttReferenceMillisecond
+        let throughput = throughput ?? throughputReferenceByte
+        let rttScore = 1 - min((rtt * 2) / rttReferenceMillisecond, 1)
+        let throughputScore = 1 - min((throughput / 5) / throughputReferenceByte, 1)
         
         let timeWeight = min(max(cos(min(elapsedSeconds / timeConstant, 1) * .pi / 2), 0), 1)
         let throughputWeight = baseThroughputWeight * timeWeight
@@ -26,12 +27,12 @@ final actor LKLatencyActor {
         // 6. 최종 네트워크 성능 점수 계산
         let networkPerformance = min(max(rttWeight * rttScore + throughputWeight * throughputScore, 0.0), 1.0)
         if networkPerformance > 0.7 {
-            return .fast
+            return .fast(rtt: rtt, throughputByte: throughput)
         }
         if networkPerformance > 0.3 {
-            return .medium
+            return .medium(rtt: rtt, throughputByte: throughput)
         }
-        return .slow
+        return .slow(rtt: rtt, throughputByte: throughput)
     }
     
     func updateRTT(to rtt: Double) -> LKStatus {
